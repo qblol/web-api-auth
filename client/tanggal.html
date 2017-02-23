@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0"/>
+  <title>Qblol</title>
+
+  <!-- CSS  -->
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <link href="css/materialize.min.css" type="text/css" rel="stylesheet" media="screen,projection"/>
+  <link href="css/style.css" type="text/css" rel="stylesheet" media="screen,projection"/>
+</head>
+<body>
+  <nav class="light-blue lighten-1" role="navigation">
+    <div class="nav-wrapper container"><a id="logo-container" href="#" class="brand-logo center">Logo</a>
+      <ul class="left hide-on-med-and-down">
+        <li><a href="data.html">Data</a></li>
+        <li class="active"><a href="tanggal.html">Tanggal</a></li>
+      </ul>
+      <ul class="right hide-on-med-and-down">
+        <li><a onclick="logout()">Logout</a></li>
+      </ul>
+    </div>
+  </nav>
+  <div class="section no-pad-bot" id="index-banner">
+    <div class="container">
+      <br><br>
+      <h4 class="header center orange-text">Add Data</h4>
+      <form class="col s12">
+        <div class="row">
+          <div class="input-field col s12">
+            <input id="tanggal" type="date" class="datepicker">
+            <label for="tanggal">Tanggal</label>
+          </div>
+        </div>
+        <div class="row">
+          <div class="input-field col s12">
+            <input id="frequency" type="number" class="validate">
+            <label for="frequency">Frequency</label>
+          </div>
+        </div>
+      </form>
+      <a class="waves-effect waves-light btn center" onclick="add()">Submit</a>
+      <br><br>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="section">
+
+      <!--   Icon Section   -->
+      <div class="row">
+        <h4 class="header center orange-text">Search</h4>
+        <form class="col s12">
+              <div class="row">
+                <div class="input-field col s5">
+                  <input placeholder="Search by Tanggal" id="searchTanggal" type="text">
+                  <label for="searchTanggal">Search Tanggal</label>
+                </div>
+                <div class="input-field col s5">
+                  <input id="searchFrequency" type="number">
+                  <label for="searchFrequency">Search Frequency</label>
+                </div>
+                <div class="input-field col s2">
+                  <a id="search" class="waves-effect waves-light btn right blue">Search</a>
+                </div>
+              </div>
+            </form>
+      </div>
+
+    </div>
+    <br><br>
+
+  </div>
+
+  <div class="container">
+      <!--   Icon Section   -->
+      <div class="row">
+        <table class="highlight centered">
+          <thead>
+            <tr>
+                <th data-field="tanggal">Tanggal</th>
+                <th data-field="frequency">Frequency</th>
+                <th data-field="action">Actions</th>
+            </tr>
+          </thead>
+
+          <tbody id="table">
+
+
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+    <br><br>
+
+    <div class="section">
+
+    </div>
+  </div>
+
+  <div id="modal" class="modal modal-fixed-footer">
+    <div class="modal-content">
+      <form class="col s12">
+        <div class="row">
+          <div class="input-field col s12">
+            <input id="edittanggal" type="date" class="datepicker">
+            <label for="tanggal">Tanggal</label>
+          </div>
+        </div>
+        <div class="row">
+          <div class="input-field col s12">
+            <input id="editfrequency" type="number" class="validate">
+            <label for="frequency">Frequency</label>
+          </div>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <a href="#" onclick="edit()" class="modal-action modal-close waves-effect waves-green btn">Submit</a>
+      <a href="#" class="modal-action modal-close waves-effect waves-green btn-flat">Cancel</a>
+    </div>
+  </div>
+
+  <footer class="page-footer orange">
+    <div class="footer-copyright">
+      <div class="container">
+        Made by <a class="orange-text text-lighten-3" href="http://materializecss.com">Materialize</a>
+      </div>
+    </div>
+  </footer>
+
+
+  <!--  Scripts-->
+  <script src="js/jquery-3.1.1.min.js"></script>
+  <script src="js/materialize.min.js"></script>
+  <script type="text/javascript">
+  $( document ).ready(function() {
+    var b = localStorage.getItem('token')
+    if(b == null) {
+      window.location.href = 'http://localhost:8080'
+    }
+    $('.datepicker').pickadate({
+      selectMonths: true, // Creates a dropdown to control month
+      selectYears: 15 // Creates a dropdown of 15 years to control year
+    });
+    $('.modal').modal();
+    get()
+    var a;
+  });
+
+
+    function get() {
+      $.ajax({
+        url: 'http://localhost:3000/api/tanggal',
+        type: 'GET',
+        success: function(data) {
+          data.forEach(function(data) {
+            $('#table').prepend(`
+              <tr>
+                <td>${data.tanggal}</td>
+                <td>${data.frequency}</td>
+                <td><a href="#modal" class="waves-effect waves-light btn" onclick="getid('${data._id}')">Update</a><a class="waves-effect waves-light btn red" onclick="del('${data._id}')">Delete</a></td>
+              </tr>
+            `)
+          })
+        }
+      })
+    }
+    function getid(id) {
+      $.ajax({
+        url: `http://localhost:3000/api/tanggal/${id}`,
+        type: 'GET',
+        success: function(data) {
+            console.log(data);
+            a = data
+            $('#edittanggal').val(a.tanggal)
+            $('#editfrequency').val(a.frequency)
+        }
+      })
+    }
+    function add() {
+      $.ajax({
+        url: 'http://localhost:3000/api/tanggal',
+        type: 'POST',
+        data: {
+          tanggal: $('#tanggal').val(),
+          frequency: $('#frequency').val()
+        },
+        success: function(data) {
+          $('#table').prepend(`
+            <tr>
+            <td>${data.tanggal}</td>
+            <td>${data.frequency}</td>
+            <td><a href="#modal" class="waves-effect waves-light btn onclick="getid('${data._id}')">Update</a><a class="waves-effect waves-light btn red" onclick="del('${data._id}')">Delete</a></td>
+            </tr>
+            `)
+          $('#tanggal').val('')
+          $('#frequency').val('')
+        }
+      })
+    }
+    function edit() {
+      $.ajax({
+        url: `http://localhost:3000/api/tanggal/${a._id}`,
+        type: "PUT",
+        data: {
+          tanggal: $('#edittanggal').val(),
+          frequency: $('#editfrequency').val()
+        },
+        success: function(data) {
+          get()
+          $('#table').empty()
+          $('#edittanggal').val('')
+          $('#editfrequency').val('')
+        }
+      })
+    }
+
+    function del(id) {
+      $.ajax({
+        url: `http://localhost:3000/api/tanggal/${id}`,
+        type: "DELETE",
+        success: function(result) {
+          $('#table').empty()
+          get()
+        }
+      })
+    }
+
+    function logout() {
+      localStorage.removeItem('token')
+      window.location.href = 'http://localhost:8080'
+    }
+  </script>
+
+</body>
+</html>
